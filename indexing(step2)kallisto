@@ -1,0 +1,19 @@
+#!/bin/sh
+#SBATCH --array=1-748%748
+#SBATCH --job-name=newfile
+#SBATCH --ntasks-per-node=4
+#SBATCH --time=60:00:00
+#SBATCH --mem-per-cpu=50GB
+#SBATCH --output=out/%x_%a.out
+#SBATCH --mail-type=ALL
+##SBATCH --mail
+
+
+samplesheet="pairedlines.txt"
+f=`sed -n "$SLURM_ARRAY_TASK_ID"p $samplesheet |  awk '{print $1}'`
+output=`echo ${f} | cut -d'/' -f2-`
+
+
+ml kallisto
+#kallisto index -i transcriptome_index.idx Sbicolor_730_v5.1.transcript_primaryTranscriptOnly.fa.gz
+kallisto quant -i transcriptome_index.idx -o output_directory/${output} -b 100 ${f}_1_paired.fastq.gz ${f}_2_paired.fastq.gz
